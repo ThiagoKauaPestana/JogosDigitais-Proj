@@ -1,7 +1,7 @@
 # JogosDigitais-Proj
 Projeto Jogos Digitais
 
-# QUADROKANBAN–Projeto “Reflexo Duplo” dividido em 4 semanas
+# QUADRO KANBAN–Projeto “Reflexo Duplo” dividido em 4 semanas
 ## BACKLOG(geral do projeto)
 • Configuração inicial do projeto libGDX
 • Mecânica de movimento automático
@@ -15,7 +15,7 @@ Projeto Jogos Digitais
 • Ajustes de acessibilidade (tamanho, cores, tempo de resposta)
 • Testes com foco em público idoso
 • Polimento geral
-# SEMANA 1–Basedojogo
+# SEMANA 1–Base do jogo
 Foco: deixar o jogo “rodando”
 ### A Fazer
 • Criar projeto no libGDX; Configurar tela inicial simples; Implementar personagem básico (sprite
