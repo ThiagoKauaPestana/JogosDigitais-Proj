@@ -3,18 +3,18 @@ Projeto Jogos Digitais
 
 # QUADRO KANBAN–Projeto “Reflexo Duplo” dividido em 4 semanas
 ## BACKLOG(geral do projeto)
-• Configuração inicial do projeto libGDX
-• Mecânica de movimento automático
-• Sistema de troca (gravidade / linhas)
-• Criação de obstáculos
-• Sistema de colisão
-• HUD(pontuação, feedback visual)
-• Sistema de progressão de dificuldade
-• Sons e feedbacks auditivos
-• Interface simples (menu inicial e retry)
-• Ajustes de acessibilidade (tamanho, cores, tempo de resposta)
-• Testes com foco em público idoso
-• Polimento geral
+• Configuração inicial do projeto libGDX <br>
+• Mecânica de movimento automático <br>
+• Sistema de troca (gravidade / linhas) <br>
+• Criação de obstáculos <br>
+• Sistema de colisão <br>
+• HUD(pontuação, feedback visual) <br>
+• Sistema de progressão de dificuldade <br>
+• Sons e feedbacks auditivos <br>
+• Interface simples (menu inicial e retry) <br>
+• Ajustes de acessibilidade (tamanho, cores, tempo de resposta) <br>
+• Testes com foco em público idoso <br>
+• Polimento geral <br>
 # SEMANA 1–Base do jogo
 Foco: deixar o jogo “rodando”
 ### A Fazer
