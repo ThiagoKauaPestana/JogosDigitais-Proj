@@ -1,66 +1,33 @@
-# JogosDigitais-Proj
-Projeto Jogos Digitais
+# ReflexoDuplo
 
-# 🧩 QUADRO KANBAN – Projeto “Reflexo Duplo”
+A [libGDX](https://libgdx.com/) project generated with [gdx-liftoff](https://github.com/libgdx/gdx-liftoff).
 
-## 📌 BACKLOG (Geral do Projeto)
-- Configuração inicial do projeto libGDX  
-- Mecânica de movimento automático  
-- Sistema de troca (gravidade / linhas)  
-- Criação de obstáculos  
-- Sistema de colisão  
-- HUD (pontuação, feedback visual)  
-- Sistema de progressão de dificuldade  
-- Sons e feedbacks auditivos  
-- Interface simples (menu inicial e retry)  
-- Ajustes de acessibilidade  
-- Testes com foco em público idoso  
-- Polimento geral  
+This project was generated with a template including simple application launchers and an `ApplicationAdapter` extension that draws libGDX logo.
 
----
+## Platforms
 
-## 📅 SEMANA 1 – Base do jogo
+- `core`: Main module with the application logic shared by all platforms.
+- `lwjgl3`: Primary desktop platform using LWJGL3; was called 'desktop' in older docs.
 
-| A Fazer | Em Progresso | Concluído |
-|--------|-------------|----------|
-| Criar projeto no libGDX | Movimento contínuo do personagem | Jogo abre e roda |
-| Configurar tela inicial simples |  | Personagem se move sozinho |
-| Implementar personagem básico |  | Estrutura pronta para mecânicas |
-| Criar movimento automático |  |  |
-| Estrutura de game loop |  |  |
+## Gradle
 
----
+This project uses [Gradle](https://gradle.org/) to manage dependencies.
+The Gradle wrapper was included, so you can run Gradle tasks using `gradlew.bat` or `./gradlew` commands.
+Useful Gradle tasks and flags:
 
-## 📅 SEMANA 2 – Mecânicas principais
+- `--continue`: when using this flag, errors will not stop the tasks from running.
+- `--daemon`: thanks to this flag, Gradle daemon will be used to run chosen tasks.
+- `--offline`: when using this flag, cached dependency archives will be used.
+- `--refresh-dependencies`: this flag forces validation of all dependencies. Useful for snapshot versions.
+- `build`: builds sources and archives of every project.
+- `cleanEclipse`: removes Eclipse project data.
+- `cleanIdea`: removes IntelliJ project data.
+- `clean`: removes `build` folders, which store compiled classes and built archives.
+- `eclipse`: generates Eclipse project data.
+- `idea`: generates IntelliJ project data.
+- `lwjgl3:jar`: builds application's runnable jar, which can be found at `lwjgl3/build/libs`.
+- `lwjgl3:run`: starts the application.
+- `test`: runs unit tests (if any).
 
-| A Fazer | Em Progresso | Concluído |
-|--------|-------------|----------|
-| Implementar botão 1 | Ajuste da física | Jogador interage com botões |
-| Implementar botão 2 |  | Obstáculos funcionando |
-| Criar obstáculos |  | Sistema de “game over” |
-| Sistema de colisão |  |  |
-
----
-
-## 📅 SEMANA 3 – Experiência e progressão
-
-| A Fazer | Em Progresso | Concluído |
-|--------|-------------|----------|
-| Sistema de pontuação | Balanceamento da dificuldade | Jogo com progressão |
-| Aumento de dificuldade |  | Feedback claro |
-| HUD simples |  |  |
-| Feedback visual |  |  |
-| Sons básicos |  |  |
-
----
-
-## 📅 SEMANA 4 – Polimento e acessibilidade
-
-| A Fazer | Em Progresso | Concluído |
-|--------|-------------|----------|
-| Menu inicial e retry | Testes com usuários | Jogo completo |
-| Ajustar botões |  | Experiência acessível |
-| Melhorar cores/contraste |  | Pronto para entrega |
-| Ajustar tempo de resposta |  |  |
-| Testes de usabilidade |  |  |
-| Correção de bugs |  |  |
+Note that most tasks that are not specific to a single project can be run with `name:` prefix, where the `name` should be replaced with the ID of a specific project.
+For example, `core:clean` removes `build` folder only from the `core` project.
