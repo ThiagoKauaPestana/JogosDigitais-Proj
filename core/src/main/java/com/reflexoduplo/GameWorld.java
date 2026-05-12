@@ -1,94 +1,102 @@
-package com.reflexoduplo.world;
+package com.reflexoduplo;
 
-import com.reflexoduplo.entities.Player;
-
+import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.utils.Array;
 
 public class GameWorld {
 
-    // Dimensões lógicas do mundo (independentes da resolução de tela)
     public static final float WORLD_WIDTH  = 800f;
     public static final float WORLD_HEIGHT = 480f;
 
-    // Alturas das duas linhas de jogo
     public static final float ALTURA_LINHA_BAIXO = 60f;
-    public static final float ALTURA_LINHA_CIMA  = WORLD_HEIGHT - 60f - Player.HEIGHT;
+    public static final float ALTURA_LINHA_CIMA  = WORLD_HEIGHT - 100f - Player.HEIGHT;
 
-    // Velocidade inicial do scroll (aumentará na Semana 3 - progressão de dificuldade)
-    public static final float VELOCIDADE_INICIAL = 250f;
+    public static final float VELOCIDADE_INICIAL = 280f;
     private float velocidadeAtual;
-
-    // Scroll acumulado (usado pelo Renderer para posicionar o fundo)
     private float scrollX;
 
-    // Entidades
-    private Player player;
+    private Player          player;
+    private ObstacleManager obstacleManager;
 
-    // Estado do jogo
     public enum EstadoJogo { RODANDO, PERDEU }
     private EstadoJogo estado;
 
-    // Pontuação (placeholder Semana 3)
     private float pontuacao;
 
-    public GameWorld() {
-        velocidadeAtual = VELOCIDADE_INICIAL;
-        scrollX = 0f;
-        estado  = EstadoJogo.RODANDO;
-        pontuacao = 0f;
+    // Delay após colisão antes de liberar o retry
+    private float timerMorte = 0f;
+    private static final float DELAY_MORTE = 0.4f;
 
-        player = new Player(
-            100f,               // posição X fixa do personagem
-            ALTURA_LINHA_BAIXO, // Y da linha de baixo
-            ALTURA_LINHA_CIMA   // Y da linha de cima
+    public GameWorld() {
+        inicializar();
+    }
+
+    private void inicializar() {
+        velocidadeAtual = VELOCIDADE_INICIAL;
+        scrollX         = 0f;
+        estado          = EstadoJogo.RODANDO;
+        pontuacao       = 0f;
+        timerMorte      = 0f;
+
+        player = new Player(120f, ALTURA_LINHA_BAIXO, ALTURA_LINHA_CIMA);
+        obstacleManager = new ObstacleManager(
+            ALTURA_LINHA_BAIXO,
+            ALTURA_LINHA_CIMA,
+            WORLD_WIDTH
         );
     }
 
-    /**
-     * Game loop principal - chamado a cada frame pelo GameScreen.
-     */
     public void update(float delta) {
-        if (estado != EstadoJogo.RODANDO) return;
+        if (estado == EstadoJogo.PERDEU) {
+            timerMorte -= delta;
+            return;
+        }
 
-        // Move o mundo (runner: personagem fica parado, cenário avança)
-        scrollX += velocidadeAtual * delta;
+        scrollX    += velocidadeAtual * delta;
+        pontuacao  += velocidadeAtual * delta * 0.1f;
 
-        // Atualiza o personagem
         player.update(delta);
+        obstacleManager.update(delta, velocidadeAtual);
 
-        // Acumula pontuação por tempo sobrevivido (Semana 3 expandirá isso)
-        pontuacao += velocidadeAtual * delta * 0.1f;
-
+        verificarColisoes();
     }
 
+    private void verificarColisoes() {
+        Rectangle boundsPlayer = player.getBounds();
+        Array<Obstacle> obstaculos = obstacleManager.getObstaculos();
 
-    /** Botão 1 — Trocar de linha (implementação completa na Semana 2). */
+        for (Obstacle obs : obstaculos) {
+            if (boundsPlayer.overlaps(obs.getBounds())) {
+                player.acionarFlashColisao();
+                estado     = EstadoJogo.PERDEU;
+                timerMorte = DELAY_MORTE;
+                return;
+            }
+        }
+    }
+
+    /** Botão 1 — Troca a linha do personagem. */
     public void acaoBotao1() {
         if (estado == EstadoJogo.RODANDO) {
             player.trocarLinha();
         }
     }
 
-    /** Botão 2 — Variação da mecânica (Semana 2). */
+    /** Botão 2 — Mecânica extra (Semana 3). */
     public void acaoBotao2() {
-        // TODO Semana 2
+        // TODO Semana 3
     }
 
-    /** Reinicia o jogo (botão Retry - Semana 4). */
     public void reiniciar() {
-        scrollX = 0f;
-        pontuacao = 0f;
-        velocidadeAtual = VELOCIDADE_INICIAL;
-        estado = EstadoJogo.RODANDO;
-        player = new Player(100f, ALTURA_LINHA_BAIXO, ALTURA_LINHA_CIMA);
+        inicializar();
     }
 
     // Getters
-    public Player    getPlayer()          { return player; }
-    public float     getScrollX()         { return scrollX; }
-    public float     getVelocidadeAtual() { return velocidadeAtual; }
-    public EstadoJogo getEstado()         { return estado; }
-    public int       getPontuacao()       { return (int) pontuacao; }
-
-    // Setter usado pela colisão (Semana 2)
-    public void setEstado(EstadoJogo estado) { this.estado = estado; }
+    public Player          getPlayer()          { return player; }
+    public ObstacleManager getObstacleManager() { return obstacleManager; }
+    public float           getScrollX()         { return scrollX; }
+    public float           getVelocidadeAtual() { return velocidadeAtual; }
+    public EstadoJogo      getEstado()          { return estado; }
+    public int             getPontuacao()       { return (int) pontuacao; }
+    public boolean         podeReiniciar()      { return timerMorte <= 0f; }
 }
