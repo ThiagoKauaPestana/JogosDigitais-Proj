@@ -4,12 +4,18 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Rectangle;
 
+/**
+ * Player — Semana 4
+ * - Animação suave de troca de linha
+ * - Flash de colisão
+ * - Cores de alto contraste (acessibilidade)
+ */
 public class Player {
 
     public float x;
     public float y;
-    public static final float WIDTH  = 40f;
-    public static final float HEIGHT = 40f;
+    public static final float WIDTH  = 52f;
+    public static final float HEIGHT = 52f;
 
     private final float yLinhaBaixo;
     private final float yLinhaCima;
@@ -17,14 +23,15 @@ public class Player {
     public enum Linha { BAIXO, CIMA }
     private Linha linhaAtual = Linha.BAIXO;
 
-    // Animação suave de troca de linha (tweening)
     private float yAtual;
     private float yAlvo;
-    private static final float VEL_TWEEN = 900f;
+    private static final float VEL_TWEEN = 1100f;
 
-    // Timers de feedback visual
     private float tempoFlashColisao = 0f;
-    private static final float DUR_FLASH = 0.3f;
+    private static final float DUR_FLASH = 0.4f;
+
+    // Pulsação visual (feedback de "vivo")
+    private float pulso = 0f;
 
     public Player(float xInicial, float yLinhaBaixo, float yLinhaCima) {
         this.yLinhaBaixo = yLinhaBaixo;
@@ -36,7 +43,7 @@ public class Player {
     }
 
     public void update(float delta) {
-        // Interpolação suave até a linha alvo
+        // Tweening suave
         if (Math.abs(yAtual - yAlvo) > 1f) {
             float dir = (yAlvo > yAtual) ? 1f : -1f;
             yAtual += dir * VEL_TWEEN * delta;
@@ -47,45 +54,49 @@ public class Player {
         }
         y = yAtual;
 
+        pulso += delta * 3f;
         if (tempoFlashColisao > 0) tempoFlashColisao -= delta;
     }
 
     public void render(ShapeRenderer sr) {
-        // Cor: flash de colisão tem prioridade, depois cor por linha
+        float brilho = 0.85f + 0.15f * (float) Math.sin(pulso);
+
         Color cor;
         if (tempoFlashColisao > 0) {
-            cor = Color.RED;
+            float t = tempoFlashColisao / DUR_FLASH;
+            cor = new Color(1f, 1f - t, 1f - t, 1f);
         } else {
-            cor = (linhaAtual == Linha.CIMA) ? Color.YELLOW : Color.CYAN;
+            cor = (linhaAtual == Linha.CIMA)
+                ? new Color(1f, 0.9f * brilho, 0f, 1f)      // amarelo vibrante
+                : new Color(0f, 0.85f * brilho, 1f, 1f);    // ciano vibrante
         }
 
-        // Sombra/glow
-        sr.setColor(cor.r * 0.3f, cor.g * 0.3f, cor.b * 0.3f, 0.5f);
-        sr.rect(x - 3, y - 3, WIDTH + 6, HEIGHT + 6);
+        // Halo externo (acessibilidade: borda bem visível)
+        sr.setColor(cor.r * 0.4f, cor.g * 0.4f, cor.b * 0.4f, 0.6f);
+        sr.rect(x - 5, y - 5, WIDTH + 10, HEIGHT + 10);
 
-        // Corpo principal
+        // Corpo
         sr.setColor(cor);
         sr.rect(x, y, WIDTH, HEIGHT);
 
-        // Olhos
-        sr.setColor(0.05f, 0.05f, 0.15f, 1f);
-        sr.rect(x + 8,  y + 22, 8, 8);
-        sr.rect(x + 24, y + 22, 8, 8);
+        // Detalhe interno escuro
+        sr.setColor(0.05f, 0.05f, 0.12f, 1f);
+        sr.rect(x + 10, y + 28, 10, 10);
+        sr.rect(x + 32, y + 28, 10, 10);
 
-        // Seta indicando a linha atual
+        // Seta de direção clara para indicar qual linha
         sr.setColor(Color.WHITE);
         if (linhaAtual == Linha.BAIXO) {
-            sr.triangle(x + WIDTH / 2f, y - 8,
-                        x + WIDTH / 2f - 6, y,
-                        x + WIDTH / 2f + 6, y);
+            sr.triangle(x + WIDTH / 2f, y - 10,
+                        x + WIDTH / 2f - 8, y,
+                        x + WIDTH / 2f + 8, y);
         } else {
-            sr.triangle(x + WIDTH / 2f, y + HEIGHT + 8,
-                        x + WIDTH / 2f - 6, y + HEIGHT,
-                        x + WIDTH / 2f + 6, y + HEIGHT);
+            sr.triangle(x + WIDTH / 2f, y + HEIGHT + 10,
+                        x + WIDTH / 2f - 8, y + HEIGHT,
+                        x + WIDTH / 2f + 8, y + HEIGHT);
         }
     }
 
-    /** Botão 1 — Troca entre linha de baixo e linha de cima. */
     public void trocarLinha() {
         if (linhaAtual == Linha.BAIXO) {
             linhaAtual = Linha.CIMA;
@@ -96,14 +107,12 @@ public class Player {
         }
     }
 
-    /** Acionado pela colisão — pisca vermelho. */
     public void acionarFlashColisao() {
         tempoFlashColisao = DUR_FLASH;
     }
 
-    /** Hitbox ligeiramente menor que o sprite (mais justo para o jogador). */
     public Rectangle getBounds() {
-        return new Rectangle(x + 4, y + 4, WIDTH - 8, HEIGHT - 8);
+        return new Rectangle(x + 5, y + 5, WIDTH - 10, HEIGHT - 10);
     }
 
     public Linha getLinhaAtual()  { return linhaAtual; }

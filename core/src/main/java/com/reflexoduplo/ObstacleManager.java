@@ -3,17 +3,24 @@ package com.reflexoduplo;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.Array;
 
+/**
+ * ObstacleManager — Semana 4
+ * - Progressão de dificuldade gradual (velocidade e intervalo)
+ * - Começa lento para não frustrar o jogador idoso
+ */
 public class ObstacleManager {
 
     private final Array<Obstacle> obstaculos = new Array<>();
 
-    private float timerSpawn = 0f;
+    private float timerSpawn    = 0f;
     private float intervaloSpawn;
-    private static final float INTERVALO_INICIAL = 2.2f;
-    private static final float INTERVALO_MINIMO  = 0.8f;
 
-    private static final float OBS_LARGURA = 35f;
-    private static final float OBS_ALTURA  = 50f;
+    // Dificuldade começa bem generosa para o público idoso
+    public static final float INTERVALO_INICIAL = 3.0f;
+    public static final float INTERVALO_MINIMO  = 1.1f;
+
+    private static final float OBS_LARGURA = 42f;
+    private static final float OBS_ALTURA  = 58f;
 
     private final float yLinhaBaixo;
     private final float yLinhaCima;
@@ -27,14 +34,12 @@ public class ObstacleManager {
     }
 
     public void update(float delta, float velocidade) {
-        // Atualiza e remove obstáculos que saíram da tela
         for (int i = obstaculos.size - 1; i >= 0; i--) {
             Obstacle obs = obstaculos.get(i);
             obs.update(delta, velocidade);
             if (obs.isMorto()) obstaculos.removeIndex(i);
         }
 
-        // Timer de spawn
         timerSpawn += delta;
         if (timerSpawn >= intervaloSpawn) {
             timerSpawn = 0f;
@@ -48,17 +53,14 @@ public class ObstacleManager {
         float yObs = bloquearBaixo ? yLinhaBaixo : yLinhaCima;
 
         obstaculos.add(new Obstacle(
-            worldWidth + 10f,
-            yObs,
-            OBS_LARGURA,
-            OBS_ALTURA,
-            tipo
+            worldWidth + 10f, yObs,
+            OBS_LARGURA, OBS_ALTURA, tipo
         ));
     }
 
-    /** Chamado pela progressão de dificuldade na Semana 3. */
-    public void aumentarDificuldade(float novoIntervalo) {
-        intervaloSpawn = Math.max(INTERVALO_MINIMO, novoIntervalo);
+    /** Chamado pelo GameWorld a cada frame para ajustar dificuldade. */
+    public void setIntervalo(float intervalo) {
+        this.intervaloSpawn = Math.max(INTERVALO_MINIMO, intervalo);
     }
 
     public void reiniciar() {

@@ -4,7 +4,8 @@ import com.badlogic.gdx.Game;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 
 /**
- * ReflexoDuploGame — Classe principal do jogo.
+ * ReflexoDuploGame — Classe principal.
+ * Semana 4: sem alterações de lógica, tela cheia definida no DesktopLauncher.
  */
 public class ReflexoDuploGame extends Game {
 
