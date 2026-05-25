@@ -3,12 +3,6 @@ package com.reflexoduplo;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Array;
 
-/**
- * GameWorld — Semana 4
- * - Progressão de dificuldade gradual (velocidade + frequência de obstáculos)
- * - Pontuação por obstáculos desviados
- * - Recorde da sessão
- */
 public class GameWorld {
 
     public static final float WORLD_WIDTH  = 1280f;
@@ -17,10 +11,9 @@ public class GameWorld {
     public static final float ALTURA_LINHA_BAIXO = 80f;
     public static final float ALTURA_LINHA_CIMA  = WORLD_HEIGHT - 130f - Player.HEIGHT;
 
-    // Velocidade: começa confortável, sobe gradualmente
     public static final float VELOCIDADE_INICIAL = 240f;
     public static final float VELOCIDADE_MAXIMA  = 520f;
-    private static final float ACELERACAO        = 12f; // px/s por segundo
+    private static final float ACELERACAO        = 12f;
 
     private float velocidadeAtual;
     private float scrollX;
@@ -32,13 +25,12 @@ public class GameWorld {
     public enum EstadoJogo { MENU, RODANDO, PERDEU }
     private EstadoJogo estado = EstadoJogo.MENU;
 
-    // Pontuação
     private int   pontuacao      = 0;
-    private int   recorde        = 0;    // recorde da sessão
-    private int   obstDesviados  = 0;   // conta obstáculos que passaram pelo player
-    private float timerPontuacao = 0f;  // incrementa a cada segundo sobrevivido
+    private int   recorde        = 0;
+    private int   obstDesviados  = 0;
+    private float timerPontuacao = 0f;
+    private int   fase           = 1;
 
-    // Delay pós-colisão
     private float timerMorte = 0f;
     private static final float DELAY_MORTE = 0.5f;
 
@@ -54,12 +46,11 @@ public class GameWorld {
         obstDesviados   = 0;
         timerPontuacao  = 0f;
         timerMorte      = 0f;
+        fase            = 1;
         estado          = EstadoJogo.MENU;
 
         player = new Player(160f, ALTURA_LINHA_BAIXO, ALTURA_LINHA_CIMA);
-        obstacleManager = new ObstacleManager(
-            ALTURA_LINHA_BAIXO, ALTURA_LINHA_CIMA, WORLD_WIDTH
-        );
+        obstacleManager = new ObstacleManager(ALTURA_LINHA_BAIXO, ALTURA_LINHA_CIMA, WORLD_WIDTH);
     }
 
     public void update(float delta) {
@@ -71,25 +62,54 @@ public class GameWorld {
         tempoJogo += delta;
         scrollX   += velocidadeAtual * delta;
 
-        // Progressão de velocidade gradual
         if (velocidadeAtual < VELOCIDADE_MAXIMA) {
-            velocidadeAtual = Math.min(
-                VELOCIDADE_MAXIMA,
-                velocidadeAtual + ACELERACAO * delta
-            );
+            velocidadeAtual = Math.min(VELOCIDADE_MAXIMA, velocidadeAtual + ACELERACAO * delta);
         }
 
-        // Ajusta intervalo de spawn conforme velocidade
-        float progresso = (velocidadeAtual - VELOCIDADE_INICIAL)
-                        / (VELOCIDADE_MAXIMA  - VELOCIDADE_INICIAL);
-        float intervalo = ObstacleManager.INTERVALO_INICIAL
-            - progresso * (ObstacleManager.INTERVALO_INICIAL - ObstacleManager.INTERVALO_MINIMO);
-        obstacleManager.setIntervalo(intervalo);
+        // Sistema de Fases
+        if (pontuacao < 200) {
+            fase = 1;
+        } else if (pontuacao < 500) {
+            fase = 2;
+        } else if (pontuacao < 1000) {
+            fase = 3;
+        } else {
+            fase = 4;
+        }
+
+        float progressoVelocidade = (velocidadeAtual - VELOCIDADE_INICIAL) / (VELOCIDADE_MAXIMA - VELOCIDADE_INICIAL);
+        
+        float intervaloBaseInicial = ObstacleManager.INTERVALO_INICIAL;
+        float intervaloBaseMinimo  = ObstacleManager.INTERVALO_MINIMO;
+
+        if (fase == 2) {
+            intervaloBaseInicial *= 0.75f;
+            intervaloBaseMinimo  *= 0.75f;
+        } else if (fase == 3) {
+            intervaloBaseInicial *= 0.55f;
+            intervaloBaseMinimo  *= 0.55f;
+        } else if (fase >= 4) {
+            intervaloBaseInicial *= 0.40f;
+            intervaloBaseMinimo  *= 0.40f;
+        }
+
+        float intervaloCalculado = intervaloBaseInicial - progressoVelocidade * (intervaloBaseInicial - intervaloBaseMinimo);
+        obstacleManager.setIntervalo(intervaloCalculado);
 
         player.update(delta);
+        
+        // Lógica de pontuação por obstáculos superados (calculada com segurança pelo tamanho da lista)
+        int totalAntes = obstacleManager.getObstaculos().size;
         obstacleManager.update(delta, velocidadeAtual);
+        int totalDepois = obstacleManager.getObstaculos().size;
 
-        // Pontuação por tempo sobrevivido
+        if (totalDepois < totalAntes) {
+            int removidos = totalAntes - totalDepois;
+            obstDesviados += removidos;
+            pontuacao     += removidos * 15;
+        }
+
+        // Pontuação passiva por tempo
         timerPontuacao += delta;
         if (timerPontuacao >= 1f) {
             timerPontuacao -= 1f;
@@ -97,27 +117,18 @@ public class GameWorld {
         }
 
         verificarColisoes();
-        contarObstaculosDesviados();
     }
 
     private void verificarColisoes() {
         Rectangle bp = player.getBounds();
         for (Obstacle obs : obstacleManager.getObstaculos()) {
             if (bp.overlaps(obs.getBounds())) {
-                player.acionarFlashColisao();
+                // CORREÇÃO 1: Voltou a usar o método original que sua classe Player possui
+                player.acionarFlashColisao(); 
                 if (pontuacao > recorde) recorde = pontuacao;
                 estado     = EstadoJogo.PERDEU;
                 timerMorte = DELAY_MORTE;
                 return;
-            }
-        }
-    }
-
-    private void contarObstaculosDesviados() {
-        for (Obstacle obs : obstacleManager.getObstaculos()) {
-            if (obs.getX() + 42f < player.x && !obs.isMorto()) {
-                // obstáculo passou pelo player sem colidir
-                // (contagem simples — o manager remove quando sai da tela)
             }
         }
     }
@@ -131,13 +142,12 @@ public class GameWorld {
     public void acaoBotao2() {
         if (estado == EstadoJogo.MENU)    { iniciarJogo(); return; }
         if (estado == EstadoJogo.PERDEU && podeReiniciar()) { reiniciar(); }
-        // Semana 3+: mecânica extra do botão 2
     }
 
     private void iniciarJogo() {
         int recordeTemp = recorde;
         inicializar();
-        recorde = recordeTemp;          // preserva o recorde entre partidas
+        recorde = recordeTemp;
         estado  = EstadoJogo.RODANDO;
     }
 
@@ -158,4 +168,5 @@ public class GameWorld {
     public int             getRecorde()         { return recorde; }
     public float           getTempoJogo()       { return tempoJogo; }
     public boolean         podeReiniciar()      { return timerMorte <= 0f; }
+    public int             getFase()            { return fase; }
 }

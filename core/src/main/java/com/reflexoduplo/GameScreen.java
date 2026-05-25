@@ -29,11 +29,10 @@ public class GameScreen implements Screen {
         boolean clicouAgora = Gdx.input.isButtonJustPressed(Input.Buttons.LEFT);
         boolean segurando   = Gdx.input.isButtonPressed(Input.Buttons.LEFT);
 
+        // O 'else if' impede o clique duplo que fechava o jogo no menu
         if (clicouAgora) {
             world.acaoBotao1();
-        }
-
-        if (segurando && !cliqueSeguradoAnterior) {
+        } else if (segurando && !cliqueSeguradoAnterior) {
             world.acaoBotao2();
         }
         cliqueSeguradoAnterior = segurando;
@@ -59,6 +58,5 @@ public class GameScreen implements Screen {
 
     @Override
     public void dispose() {
-        renderer.dispose();
     }
 }

@@ -4,12 +4,6 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Rectangle;
 
-/**
- * Player — Semana 4
- * - Animação suave de troca de linha
- * - Flash de colisão
- * - Cores de alto contraste (acessibilidade)
- */
 public class Player {
 
     public float x;
@@ -30,7 +24,7 @@ public class Player {
     private float tempoFlashColisao = 0f;
     private static final float DUR_FLASH = 0.4f;
 
-    // Pulsação visual (feedback de "vivo")
+
     private float pulso = 0f;
 
     public Player(float xInicial, float yLinhaBaixo, float yLinhaCima) {
@@ -43,7 +37,6 @@ public class Player {
     }
 
     public void update(float delta) {
-        // Tweening suave
         if (Math.abs(yAtual - yAlvo) > 1f) {
             float dir = (yAlvo > yAtual) ? 1f : -1f;
             yAtual += dir * VEL_TWEEN * delta;

@@ -3,11 +3,6 @@ package com.reflexoduplo;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.Array;
 
-/**
- * ObstacleManager — Semana 4
- * - Progressão de dificuldade gradual (velocidade e intervalo)
- * - Começa lento para não frustrar o jogador idoso
- */
 public class ObstacleManager {
 
     private final Array<Obstacle> obstaculos = new Array<>();
