@@ -11,20 +11,6 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
-/**
- * GameRenderer — Semana 4 (versão final para apresentação)
- *
- * Acessibilidade (público idoso):
- *  - Fonte grande em todo o HUD
- *  - Alto contraste: fundo escuro, elementos vibrantes
- *  - Indicadores visuais redundantes (cor + forma + texto)
- *  - Menu e retry com instruções claras dos botões físicos
- *  - Barra de velocidade para mostrar a progressão ao público
- *
- * Apresentação:
- *  - Resolução 1280x720 em tela cheia
- *  - Indicador de status do Arduino visível
- */
 public class GameRenderer {
 
     private final GameWorld world;
@@ -33,15 +19,14 @@ public class GameRenderer {
     private Viewport           viewport;
     private ShapeRenderer      shapeRenderer;
     private SpriteBatch        batch;
-    private BitmapFont         fontGrande;    // HUD principal
-    private BitmapFont         fontMedia;     // instruções
-    private BitmapFont         fontPequena;   // detalhes
+    private BitmapFont         fontGrande;
+    private BitmapFont         fontMedia;
+    private BitmapFont         fontPequena;
     private GlyphLayout        layout;
 
     private static final float W = GameWorld.WORLD_WIDTH;
     private static final float H = GameWorld.WORLD_HEIGHT;
 
-    // Paleta de alto contraste
     private static final Color FUNDO        = new Color(0.04f, 0.04f, 0.12f, 1f);
     private static final Color CHAO_COR     = new Color(0.10f, 0.10f, 0.28f, 1f);
     private static final Color LINHA_GUIA   = new Color(0.5f,  0.5f,  1.0f,  0.4f);
@@ -53,14 +38,10 @@ public class GameRenderer {
     private static final Color VERDE        = new Color(0.2f,  1f,    0.4f,  1f);
     private static final Color VERMELHO     = new Color(1f,    0.15f, 0.1f,  1f);
 
-    private static final float ALTURA_CHAO  = 72f;
-    private static final float MARG_ZONA    = 10f;
+    private static final float ALTURA_CHAO = 72f;
+    private static final float MARG_ZONA   = 10f;
 
-    // Animação de pulso para elementos do menu
     private float tempoPulso = 0f;
-
-    // Status do Arduino (passado pelo GameScreen)
-    private boolean arduinoConectado = false;
 
     public GameRenderer(GameWorld world, SpriteBatch batch) {
         this.world = world;
@@ -75,19 +56,14 @@ public class GameRenderer {
         shapeRenderer = new ShapeRenderer();
         layout        = new GlyphLayout();
 
-        // Fontes escaladas — libGDX BitmapFont escala a partir de 1x
-        fontGrande  = new BitmapFont();
+        fontGrande = new BitmapFont();
         fontGrande.getData().setScale(3.2f);
 
-        fontMedia   = new BitmapFont();
+        fontMedia = new BitmapFont();
         fontMedia.getData().setScale(2.0f);
 
         fontPequena = new BitmapFont();
         fontPequena.getData().setScale(1.3f);
-    }
-
-    public void setArduinoConectado(boolean conectado) {
-        this.arduinoConectado = conectado;
     }
 
     public void render(float delta) {
@@ -100,15 +76,11 @@ public class GameRenderer {
         batch.setProjectionMatrix(camera.combined);
 
         switch (world.getEstado()) {
-            case MENU:    renderCenario(); renderMenuInicial(); break;
-            case RODANDO: renderCenario(); renderJogo();        break;
-            case PERDEU:  renderCenario(); renderJogo(); renderTelaGameOver(); break;
+            case MENU:    renderCenario(); renderMenuInicial();              break;
+            case RODANDO: renderCenario(); renderJogo();                     break;
+            case PERDEU:  renderCenario(); renderJogo(); renderGameOver();   break;
         }
     }
-
-    // =========================================================================
-    // CENÁRIO BASE
-    // =========================================================================
 
     private void renderCenario() {
         renderFundo();
@@ -141,8 +113,8 @@ public class GameRenderer {
     private void renderChao() {
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
         shapeRenderer.setColor(CHAO_COR);
-        shapeRenderer.rect(0, 0, W, ALTURA_CHAO);                          // chão inferior
-        shapeRenderer.rect(0, H - ALTURA_CHAO, W, ALTURA_CHAO);           // teto superior
+        shapeRenderer.rect(0, 0, W, ALTURA_CHAO);
+        shapeRenderer.rect(0, H - ALTURA_CHAO, W, ALTURA_CHAO);
         shapeRenderer.end();
 
         shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
@@ -186,12 +158,7 @@ public class GameRenderer {
         shapeRenderer.end();
     }
 
-    // =========================================================================
-    // HUD DO JOGO
-    // =========================================================================
-
     private void renderJogo() {
-        // --- Painel superior esquerdo: pontuação ---
         renderPainelHUD(10, H - 80, 280, 70);
         batch.begin();
         fontMedia.setColor(Color.WHITE);
@@ -200,7 +167,6 @@ public class GameRenderer {
         fontGrande.draw(batch, String.valueOf(world.getPontuacao()), 26f, H - 42f);
         batch.end();
 
-        // --- Painel superior direito: recorde ---
         renderPainelHUD(W - 290, H - 80, 280, 70);
         batch.begin();
         fontMedia.setColor(Color.WHITE);
@@ -212,7 +178,6 @@ public class GameRenderer {
             W - 280f + (280f - layout.width) / 2f, H - 42f);
         batch.end();
 
-        // --- Linha atual (centro topo) ---
         String linhaStr = (world.getPlayer().getLinhaAtual() == Player.Linha.BAIXO)
             ? "LINHA: BAIXO" : "LINHA: CIMA";
         Color corLinha = (world.getPlayer().getLinhaAtual() == Player.Linha.BAIXO)
@@ -224,11 +189,7 @@ public class GameRenderer {
         fontMedia.draw(batch, linhaStr, W / 2f - layout.width / 2f, H - 18f);
         batch.end();
 
-        // --- Barra de velocidade (inferior) ---
         renderBarraVelocidade();
-
-        // --- Status Arduino (canto inferior direito) ---
-        renderStatusArduino();
     }
 
     private void renderBarraVelocidade() {
@@ -243,7 +204,6 @@ public class GameRenderer {
         shapeRenderer.setColor(0.2f, 0.2f, 0.4f, 1f);
         shapeRenderer.rect(barX, barY, barW, barH);
 
-        // Gradiente de cor: verde → amarelo → vermelho
         Color corBarra = new Color(
             Math.min(1f, progresso * 2f),
             Math.max(0f, 1f - progresso),
@@ -260,28 +220,7 @@ public class GameRenderer {
         batch.end();
     }
 
-    private void renderStatusArduino() {
-        Color cor = arduinoConectado ? VERDE : VERMELHO;
-        String txt = arduinoConectado ? "BOTOES: CONECTADOS" : "BOTOES: DESCONECTADOS";
-
-        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
-        shapeRenderer.setColor(cor.r, cor.g, cor.b, 0.2f);
-        shapeRenderer.rect(W - 340f, 8f, 330f, 40f);
-        shapeRenderer.end();
-
-        batch.begin();
-        fontPequena.setColor(cor);
-        layout.setText(fontPequena, txt);
-        fontPequena.draw(batch, txt, W - 335f, 38f);
-        batch.end();
-    }
-
-    // =========================================================================
-    // MENU INICIAL
-    // =========================================================================
-
     private void renderMenuInicial() {
-        // Overlay
         renderOverlay(OVERLAY_MENU);
 
         float pulso = 0.7f + 0.3f * (float) Math.sin(tempoPulso * 2.2f);
@@ -290,56 +229,40 @@ public class GameRenderer {
 
         batch.begin();
 
-        // Título
         fontGrande.getData().setScale(5.0f);
         fontGrande.setColor(CIANO);
         layout.setText(fontGrande, "REFLEXO DUPLO");
-        fontGrande.draw(batch, "REFLEXO DUPLO", cx - layout.width / 2f, cy + 180f);
+        fontGrande.draw(batch, "REFLEXO DUPLO", cx - layout.width / 2f, cy + 190f);
         fontGrande.getData().setScale(3.2f);
 
-        // Subtítulo
         fontMedia.setColor(new Color(0.7f, 0.7f, 1f, 1f));
-        layout.setText(fontMedia, "Jogo de reabilitação e reflexo");
-        fontMedia.draw(batch, "Jogo de reabilitação e reflexo",
-            cx - layout.width / 2f, cy + 110f);
+        layout.setText(fontMedia, "Jogo de reabilitacao e reflexo");
+        fontMedia.draw(batch, "Jogo de reabilitacao e reflexo",
+            cx - layout.width / 2f, cy + 120f);
 
-        // Separador
         batch.end();
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
         shapeRenderer.setColor(0.3f, 0.3f, 0.6f, 0.8f);
-        shapeRenderer.rect(cx - 260f, cy + 68f, 520f, 2f);
+        shapeRenderer.rect(cx - 260f, cy + 78f, 520f, 2f);
         shapeRenderer.end();
         batch.begin();
 
-        // Instrução de botão 1 (grande e clara)
-        renderBotaoInstrucao(batch, cx, cy + 30f,
-            "BOTAO VERDE", "Iniciar jogo / Trocar linha", VERDE, pulso);
+        renderBotaoInstrucao(batch, cx, cy + 35f,
+            "CLIQUE", "Trocar linha / Iniciar", VERDE, pulso);
+        renderBotaoInstrucao(batch, cx, cy - 45f,
+            "SEGURAR", "Acao extra", AMARELO, 1f);
 
-        // Instrução de botão 2
-        renderBotaoInstrucao(batch, cx, cy - 50f,
-            "BOTAO VERMELHO", "Reiniciar / Acao extra", VERMELHO, 1f);
-
-        // Dica de teclado (para apresentação sem Arduino)
         fontPequena.setColor(0.5f, 0.5f, 0.7f, 1f);
-        String dicaTeclado = "Teclado: [ESPACO] Trocar linha   [R] Reiniciar   [ESC] Sair";
-        layout.setText(fontPequena, dicaTeclado);
-        fontPequena.draw(batch, dicaTeclado, cx - layout.width / 2f, cy - 130f);
-
-        // Status Arduino
-        fontPequena.setColor(arduinoConectado ? VERDE : new Color(1f, 0.5f, 0.2f, 1f));
-        String statusTxt = arduinoConectado
-            ? "✓  Botoes fisicos conectados"
-            : "!  Botoes fisicos nao detectados — usando teclado";
-        layout.setText(fontPequena, statusTxt);
-        fontPequena.draw(batch, statusTxt, cx - layout.width / 2f, cy - 165f);
+        String dica = "F11 = Tela cheia   ESC = Sair";
+        layout.setText(fontPequena, dica);
+        fontPequena.draw(batch, dica, cx - layout.width / 2f, cy - 130f);
 
         batch.end();
     }
 
     private void renderBotaoInstrucao(SpriteBatch b, float cx, float cy,
-                                       String nomeBotao, String acao,
+                                       String label, String acao,
                                        Color cor, float pulso) {
-        // Caixa do botão
         float bw = 500f, bh = 54f;
         b.end();
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
@@ -351,48 +274,41 @@ public class GameRenderer {
         b.begin();
 
         fontMedia.setColor(cor);
-        layout.setText(fontMedia, nomeBotao);
-        fontMedia.draw(b, nomeBotao, cx - layout.width / 2f - 80f, cy + 12f);
+        layout.setText(fontMedia, label);
+        fontMedia.draw(b, label, cx - layout.width / 2f - 80f, cy + 12f);
 
         fontPequena.setColor(Color.WHITE);
         layout.setText(fontPequena, acao);
         fontPequena.draw(b, acao, cx - layout.width / 2f + 50f, cy - 4f);
     }
 
-    // =========================================================================
-    // TELA DE GAME OVER / RETRY
-    // =========================================================================
-
-    private void renderTelaGameOver() {
+    private void renderGameOver() {
         renderOverlay(new Color(0f, 0f, 0f, 0.72f));
 
-        float pulso   = 0.75f + 0.25f * (float) Math.sin(tempoPulso * 2.5f);
-        float cx      = W / 2f;
-        float cy      = H / 2f;
-        boolean pode  = world.podeReiniciar();
+        float pulso  = 0.75f + 0.25f * (float) Math.sin(tempoPulso * 2.5f);
+        float cx     = W / 2f;
+        float cy     = H / 2f;
+        boolean pode = world.podeReiniciar();
 
         batch.begin();
 
-        // Título "PERDEU"
         fontGrande.getData().setScale(5.5f);
         fontGrande.setColor(VERMELHO);
         layout.setText(fontGrande, "PERDEU!");
         fontGrande.draw(batch, "PERDEU!", cx - layout.width / 2f, cy + 195f);
         fontGrande.getData().setScale(3.2f);
 
-        // Pontuação
         fontGrande.setColor(Color.WHITE);
         layout.setText(fontGrande, "Pontuacao: " + world.getPontuacao());
         fontGrande.draw(batch, "Pontuacao: " + world.getPontuacao(),
             cx - layout.width / 2f, cy + 115f);
 
-        // Recorde
         boolean novoRecorde = world.getPontuacao() >= world.getRecorde()
                            && world.getPontuacao() > 0;
         if (novoRecorde) {
             fontMedia.setColor(AMARELO);
-            layout.setText(fontMedia, "★  NOVO RECORDE!  ★");
-            fontMedia.draw(batch, "★  NOVO RECORDE!  ★", cx - layout.width / 2f, cy + 60f);
+            layout.setText(fontMedia, "NOVO RECORDE!");
+            fontMedia.draw(batch, "NOVO RECORDE!", cx - layout.width / 2f, cy + 60f);
         } else {
             fontMedia.setColor(new Color(0.6f, 0.6f, 0.9f, 1f));
             layout.setText(fontMedia, "Recorde: " + world.getRecorde());
@@ -400,25 +316,18 @@ public class GameRenderer {
                 cx - layout.width / 2f, cy + 60f);
         }
 
-        // Botões de retry (só aparecem após o delay)
         if (pode) {
             renderBotaoInstrucao(batch, cx, cy - 20f,
-                "BOTAO VERDE", "Jogar novamente", VERDE, pulso);
-            renderBotaoInstrucao(batch, cx, cy - 90f,
-                "BOTAO VERMELHO", "Jogar novamente", VERMELHO, 1f);
+                "CLIQUE", "Jogar novamente", VERDE, pulso);
 
             fontPequena.setColor(0.5f, 0.5f, 0.7f, 1f);
-            layout.setText(fontPequena, "Teclado: [ESPACO] ou [R] para jogar novamente");
-            fontPequena.draw(batch, "Teclado: [ESPACO] ou [R] para jogar novamente",
-                cx - layout.width / 2f, cy - 155f);
+            String msg = "Clique para jogar novamente";
+            layout.setText(fontPequena, msg);
+            fontPequena.draw(batch, msg, cx - layout.width / 2f, cy - 110f);
         }
 
         batch.end();
     }
-
-    // =========================================================================
-    // UTILITÁRIOS
-    // =========================================================================
 
     private void renderOverlay(Color cor) {
         Gdx.gl.glEnable(GL20.GL_BLEND);

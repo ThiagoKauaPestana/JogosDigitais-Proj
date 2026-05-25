@@ -122,10 +122,6 @@ public class GameWorld {
         }
     }
 
-    // -------------------------------------------------------------------------
-    // Ações dos botões físicos
-    // -------------------------------------------------------------------------
-
     public void acaoBotao1() {
         if (estado == EstadoJogo.MENU)    { iniciarJogo(); return; }
         if (estado == EstadoJogo.RODANDO) { player.trocarLinha(); }
